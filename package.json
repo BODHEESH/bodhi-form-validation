@@ -1,0 +1,59 @@
+{
+  "name": "bodhi-form-validations",
+  "version": "1.0.0",
+  "description": "A comprehensive, modern form validation library with TypeScript support",
+  "keywords": [
+    "form validation",
+    "react form validation",
+    "form",
+    "simple form validation",
+    "typescript",
+    "validation",
+    "forms",
+    "input validation",
+    "credit card validation",
+    "phone validation",
+    "email validation",
+    "password validation",
+    "postal code validation"
+  ],
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest",
+    "lint": "eslint src/**/*.ts",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "prepare": "npm run build",
+    "prepublishOnly": "npm test && npm run lint",
+    "docs": "typedoc src/index.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/BODHEESH/bodhi-form-validation"
+  },
+  "author": "BODHEESH",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/BODHEESH/bodhi-form-validation/issues"
+  },
+  "homepage": "https://github.com/BODHEESH/bodhi-form-validation#readme",
+  "devDependencies": {
+    "@types/jest": "^29.5.0",
+    "@types/node": "^20.0.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "eslint": "^8.40.0",
+    "jest": "^29.5.0",
+    "prettier": "^3.0.0",
+    "ts-jest": "^29.1.0",
+    "typedoc": "^0.24.0",
+    "typescript": "^5.0.0"
+  },
+  "files": [
+    "dist/**/*"
+  ],
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}
