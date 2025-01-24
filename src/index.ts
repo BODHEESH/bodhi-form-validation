@@ -172,6 +172,19 @@ export interface FileTypeOptions {
   allowHidden?: boolean;
 }
 
+export interface TimeConversionResult {
+  hour: number;
+  minute: number;
+  isValid: boolean;
+  error?: string;
+}
+
+export interface DMSConversionResult {
+  dms: string;
+  isValid: boolean;
+  error?: string;
+}
+
 export interface Validator {
   isUsername(userName: string, options?: UsernameOptions): ValidationResult;
   isEmail(email: string, options?: EmailOptions): ValidationResult;
@@ -1234,7 +1247,7 @@ const validate: Validator = {
 };
 
 // Helper functions
-function convertTo24Hour(time12h: string): string {
+function convertTo24Hour(time12h: string): TimeConversionResult {
   const [time, modifier] = time12h.split(' ');
   let [hours, minutes, seconds] = time.split(':');
   
@@ -1246,10 +1259,14 @@ function convertTo24Hour(time12h: string): string {
     hours = (parseInt(hours, 10) + 12).toString();
   }
   
-  return `${hours}:${minutes}${seconds ? `:${seconds}` : ''}`;
+  return {
+    hour: parseInt(hours, 10),
+    minute: parseInt(minutes, 10),
+    isValid: true
+  };
 }
 
-function convertToDMS(decimal: number, type: 'lat' | 'lng'): string {
+function convertToDMS(decimal: number, type: 'lat' | 'lng'): DMSConversionResult {
   const absolute = Math.abs(decimal);
   const degrees = Math.floor(absolute);
   const minutesNotTruncated = (absolute - degrees) * 60;
@@ -1260,7 +1277,10 @@ function convertToDMS(decimal: number, type: 'lat' | 'lng'): string {
     ? decimal >= 0 ? 'N' : 'S'
     : decimal >= 0 ? 'E' : 'W';
   
-  return `${degrees}°${minutes}'${seconds}"${direction}`;
+  return {
+    dms: `${degrees}°${minutes}'${seconds}"${direction}`,
+    isValid: true
+  };
 }
 
 export default validate;
