@@ -152,6 +152,17 @@ export interface FileTypeOptions {
     checkMimeType?: boolean;
     allowHidden?: boolean;
 }
+export interface TimeConversionResult {
+    hour: number;
+    minute: number;
+    isValid: boolean;
+    error?: string;
+}
+export interface DMSConversionResult {
+    dms: string;
+    isValid: boolean;
+    error?: string;
+}
 export interface Validator {
     isUsername(userName: string, options?: UsernameOptions): ValidationResult;
     isEmail(email: string, options?: EmailOptions): ValidationResult;

@@ -1,10 +1,136 @@
 # Bodhi Form Validations
 
-A comprehensive, modern form validation library with TypeScript support. Provides extensive validation rules for forms, with customizable options and detailed error messages.
+A powerful, zero-dependency form validation library for modern web applications. Built with TypeScript and designed for developers who need robust, flexible, and type-safe form validation.
 
 [![npm version](https://badge.fury.io/js/bodhi-form-validations.svg)](https://badge.fury.io/js/bodhi-form-validations)
 [![TypeScript](https://badges.frapsoft.com/typescript/code/typescript.svg?v=101)](https://github.com/ellerbrock/typescript-badges/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+## 🚀 Quick Start
+
+```bash
+npm install bodhi-form-validations
+```
+
+```typescript
+import validate from 'bodhi-form-validations';
+
+// Simple email validation
+const emailResult = validate.isEmail('user@example.com');
+// { isValid: true, message: 'Valid email' }
+
+// Advanced password validation
+const passwordResult = validate.isPassword('MyPass123!', {
+  minLength: 8,
+  requireUppercase: true,
+  requireNumbers: true
+});
+// { isValid: true, message: 'Valid password', strength: 0.8 }
+
+// Form validation
+const formResult = validate.isObject({
+  email: 'user@example.com',
+  password: 'MyPass123!',
+  age: 25
+}, {
+  requiredFields: ['email', 'password'],
+  fieldValidators: {
+    email: (value) => validate.isEmail(value),
+    password: (value) => validate.isPassword(value, { minLength: 8 }),
+    age: (value) => validate.isNumber(value, { min: 18 })
+  }
+});
+```
+
+## ✨ Why Choose Bodhi Form Validations?
+
+- 🎯 **Type-Safe**: Full TypeScript support with comprehensive type definitions
+- 🔧 **Flexible**: Customize validation rules to match your exact requirements
+- 🌐 **Framework Agnostic**: Works seamlessly with React, Vue, Angular, or vanilla JS
+- 📦 **Zero Dependencies**: Lightweight and efficient, no external dependencies
+- 🔍 **Detailed Feedback**: Rich validation results with messages and strength indicators
+- 🌍 **International**: Support for various formats across different locales
+- ⚡ **Performance**: Optimized for handling complex form validations
+- 🛡️ **Security**: Built-in rules for secure password validation
+
+## 📋 Available Validations
+
+```typescript
+// Email Validation
+validate.isEmail('user@example.com', {
+  allowSubdomains: true,    // Allow subdomain emails
+  allowInternational: true  // Allow international characters
+});
+
+// Password Validation
+validate.isPassword('MySecurePass123!', {
+  minLength: 8,            // Minimum length requirement
+  requireUppercase: true,  // Must contain uppercase letters
+  requireNumbers: true,    // Must contain numbers
+  requireSymbols: true     // Must contain special characters
+});
+
+// Phone Number Validation
+validate.isPhone('+1-555-123-4567', {
+  country: 'US',           // Country-specific format
+  requireCountryCode: true // Must include country code
+});
+
+// Date Validation
+validate.isDate('2025-01-25', {
+  minDate: '2025-01-01',   // Minimum allowed date
+  maxDate: '2025-12-31',   // Maximum allowed date
+  allowFuture: true        // Allow future dates
+});
+
+// Number Validation
+validate.isNumber('42.5', {
+  min: 0,                  // Minimum value
+  max: 100,                // Maximum value
+  precision: 2             // Decimal places
+});
+```
+
+## 🎨 Framework Integration Examples
+
+### React Hook Example
+```typescript
+import { useState } from 'react';
+import validate from 'bodhi-form-validations';
+
+function useFormValidation(initialValue = '') {
+  const [value, setValue] = useState(initialValue);
+  const [error, setError] = useState('');
+
+  const validateField = (validator) => {
+    const result = validator(value);
+    setError(result.isValid ? '' : result.message);
+    return result.isValid;
+  };
+
+  return { value, setValue, error, validateField };
+}
+
+// Usage in component
+function LoginForm() {
+  const email = useFormValidation('');
+  
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (email.validateField(value => validate.isEmail(value))) {
+      // Proceed with form submission
+    }
+  };
+
+  return (
+    <input
+      value={email.value}
+      onChange={e => email.setValue(e.target.value)}
+      error={email.error}
+    />
+  );
+}
+```
 
 ## Table of Contents
 - [Features](#features)
@@ -2263,8 +2389,8 @@ We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) f
 
 Bodhi Form Validations provides a comprehensive solution for form validation in JavaScript/TypeScript applications. Key benefits include:
 
-- **Type Safety**: Full TypeScript support with detailed type definitions
-- **Flexibility**: Supports simple to complex validation scenarios
+- **Type Safety**: Full TypeScript support with comprehensive type definitions
+- **Flexibility**: Customize validation rules to match your exact requirements
 - **Extensibility**: Easy to extend with custom validation rules
 - **Framework Agnostic**: Works with any JavaScript framework
 - **Performance**: Optimized for both small and large forms

@@ -352,13 +352,7 @@ const validate: Validator = {
     };
   },
 
-  isPhone(phone: string, options: PhoneOptions = {}): ValidationResult {
-    const {
-      country = 'INTERNATIONAL',
-      allowSpaces = true,
-      requireCountryCode = false
-    } = options;
-
+  isPhone(phone: string, { country = 'INTERNATIONAL', requireCountryCode = false }: PhoneOptions = {}): ValidationResult {
     if (!phone || typeof phone !== 'string') {
       return { isValid: false, message: 'Phone number is required' };
     }
@@ -429,15 +423,7 @@ const validate: Validator = {
     }
   },
 
-  isDate(date: string | Date, options: DateOptions = {}): ValidationResult {
-    const {
-      format = 'YYYY-MM-DD',
-      minDate,
-      maxDate,
-      allowFuture = true,
-      allowPast = true
-    } = options;
-
+  isDate(date: string | Date, { minDate, maxDate, allowFuture = true, allowPast = true }: DateOptions = {}): ValidationResult {
     if (!date) {
       return { isValid: false, message: 'Date is required' };
     }
@@ -474,7 +460,7 @@ const validate: Validator = {
       return { isValid: false, message: 'Credit card number is required' };
     }
 
-    const num = cardNumber.replace(/[\s-]/g, '');
+    const num = cardNumber.replace(/[^\d]/g, '');
 
     if (!/^\d+$/.test(num)) {
       return { isValid: false, message: 'Credit card number can only contain digits' };
@@ -531,12 +517,7 @@ const validate: Validator = {
   isFile(file: File, options: FileValidationOptions = {}): ValidationResult {
     const {
       maxSize = 5 * 1024 * 1024, // 5MB default
-      allowedTypes = [],
-      minWidth,
-      minHeight,
-      maxWidth,
-      maxHeight,
-      aspectRatio
+      allowedTypes = []
     } = options;
 
     if (!file) {
@@ -600,10 +581,8 @@ const validate: Validator = {
 
   isMoney(amount: string | number, options: MoneyOptions = {}): ValidationResult {
     const {
-      currency = 'USD',
       minAmount = 0,
       maxAmount = Number.MAX_SAFE_INTEGER,
-      allowNegative = false,
       decimals = 2
     } = options;
 
@@ -611,10 +590,6 @@ const validate: Validator = {
 
     if (isNaN(value)) {
       return { isValid: false, message: 'Invalid monetary value' };
-    }
-
-    if (!allowNegative && value < 0) {
-      return { isValid: false, message: 'Negative values are not allowed' };
     }
 
     if (value < minAmount) {
@@ -1113,42 +1088,19 @@ const validate: Validator = {
     return { isValid: true, message: 'Valid object' };
   },
 
-  isDateInRange(date: Date | string, options: DateRangeOptions = {}): ValidationResult {
-    const {
-      minDate,
-      maxDate,
-      allowWeekends = true,
-      allowHolidays = true,
-      format,
-      timezone,
-      allowFuture = true,
-      allowPast = true,
-      minAge,
-      maxAge
-    } = options;
-
+  isDateInRange(date: Date | string, { minDate, maxDate, allowFuture = true, allowPast = true }: DateRangeOptions = {}): ValidationResult {
     // Convert string to Date if necessary
     let dateObj: Date;
     if (typeof date === 'string') {
-      if (format) {
-        // Here you would implement date parsing based on the format
-        // For now, we'll use basic parsing
-        dateObj = new Date(date);
-      } else {
-        dateObj = new Date(date);
-      }
+      // Here you would implement date parsing based on the format
+      // For now, we'll use basic parsing
+      dateObj = new Date(date);
     } else {
       dateObj = date;
     }
 
     if (isNaN(dateObj.getTime())) {
       return { isValid: false, message: 'Invalid date format' };
-    }
-
-    // Timezone adjustment if specified
-    if (timezone) {
-      // Here you would implement timezone conversion
-      // This would require a date library like moment-timezone
     }
 
     const now = new Date();
@@ -1175,40 +1127,14 @@ const validate: Validator = {
       }
     }
 
-    // Weekend check
-    if (!allowWeekends) {
-      const day = dateObj.getDay();
-      if (day === 0 || day === 6) {
-        return { isValid: false, message: 'Weekends are not allowed' };
-      }
-    }
-
-    // Age checks
-    if (minAge !== undefined || maxAge !== undefined) {
-      const ageDate = new Date(dateObj);
-      const years = now.getFullYear() - ageDate.getFullYear();
-      const monthDiff = now.getMonth() - ageDate.getMonth();
-      const dayDiff = now.getDate() - ageDate.getDate();
-      const age = years - (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0) ? 1 : 0);
-
-      if (minAge !== undefined && age < minAge) {
-        return { isValid: false, message: `Age must be at least ${minAge} years` };
-      }
-      if (maxAge !== undefined && age > maxAge) {
-        return { isValid: false, message: `Age cannot be more than ${maxAge} years` };
-      }
-    }
-
     return { isValid: true, message: 'Valid date' };
   },
 
   isValidFileType(fileName: string, options: FileTypeOptions = {}): ValidationResult {
     const {
       allowedExtensions = [],
-      allowedMimeTypes = [],
       maxFileNameLength = 255,
       allowSpaces = true,
-      checkMimeType = true,
       allowHidden = false
     } = options;
 
@@ -1249,18 +1175,17 @@ const validate: Validator = {
 // Helper functions
 function convertTo24Hour(time12h: string): TimeConversionResult {
   const [time, modifier] = time12h.split(' ');
-  let [hours, minutes, seconds] = time.split(':');
+  const [hours, minutes] = time.split(':');
+  let convertedHours = hours;
   
   if (hours === '12') {
-    hours = '00';
-  }
-  
-  if (modifier.toLowerCase() === 'pm') {
-    hours = (parseInt(hours, 10) + 12).toString();
+    convertedHours = modifier === 'AM' ? '00' : '12';
+  } else if (modifier === 'PM') {
+    convertedHours = (parseInt(hours, 10) + 12).toString();
   }
   
   return {
-    hour: parseInt(hours, 10),
+    hour: parseInt(convertedHours, 10),
     minute: parseInt(minutes, 10),
     isValid: true
   };
@@ -1271,14 +1196,12 @@ function convertToDMS(decimal: number, type: 'lat' | 'lng'): DMSConversionResult
   const degrees = Math.floor(absolute);
   const minutesNotTruncated = (absolute - degrees) * 60;
   const minutes = Math.floor(minutesNotTruncated);
-  const seconds = ((minutesNotTruncated - minutes) * 60).toFixed(2);
-  
   const direction = type === 'lat'
     ? decimal >= 0 ? 'N' : 'S'
     : decimal >= 0 ? 'E' : 'W';
   
   return {
-    dms: `${degrees}°${minutes}'${seconds}"${direction}`,
+    dms: `${degrees}°${minutes}'${direction}`,
     isValid: true
   };
 }

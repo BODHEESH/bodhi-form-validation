@@ -109,9 +109,8 @@ var validate = {
             strength: strength
         };
     },
-    isPhone: function (phone, options) {
-        if (options === void 0) { options = {}; }
-        var _a = options.country, country = _a === void 0 ? 'INTERNATIONAL' : _a, _b = options.allowSpaces, allowSpaces = _b === void 0 ? true : _b, _c = options.requireCountryCode, requireCountryCode = _c === void 0 ? false : _c;
+    isPhone: function (phone, _a) {
+        var _b = _a === void 0 ? {} : _a, _c = _b.country, country = _c === void 0 ? 'INTERNATIONAL' : _c, _d = _b.requireCountryCode, requireCountryCode = _d === void 0 ? false : _d;
         if (!phone || typeof phone !== 'string') {
             return { isValid: false, message: 'Phone number is required' };
         }
@@ -164,9 +163,8 @@ var validate = {
             return { isValid: false, message: 'Invalid URL format' };
         }
     },
-    isDate: function (date, options) {
-        if (options === void 0) { options = {}; }
-        var _a = options.format, format = _a === void 0 ? 'YYYY-MM-DD' : _a, minDate = options.minDate, maxDate = options.maxDate, _b = options.allowFuture, allowFuture = _b === void 0 ? true : _b, _c = options.allowPast, allowPast = _c === void 0 ? true : _c;
+    isDate: function (date, _a) {
+        var _b = _a === void 0 ? {} : _a, minDate = _b.minDate, maxDate = _b.maxDate, _c = _b.allowFuture, allowFuture = _c === void 0 ? true : _c, _d = _b.allowPast, allowPast = _d === void 0 ? true : _d;
         if (!date) {
             return { isValid: false, message: 'Date is required' };
         }
@@ -193,7 +191,7 @@ var validate = {
         if (!cardNumber || typeof cardNumber !== 'string') {
             return { isValid: false, message: 'Credit card number is required' };
         }
-        var num = cardNumber.replace(/[\s-]/g, '');
+        var num = cardNumber.replace(/[^\d]/g, '');
         if (!/^\d+$/.test(num)) {
             return { isValid: false, message: 'Credit card number can only contain digits' };
         }
@@ -240,7 +238,7 @@ var validate = {
         if (options === void 0) { options = {}; }
         var _a = options.maxSize, maxSize = _a === void 0 ? 5 * 1024 * 1024 : _a, // 5MB default
         _b = options.allowedTypes, // 5MB default
-        allowedTypes = _b === void 0 ? [] : _b, minWidth = options.minWidth, minHeight = options.minHeight, maxWidth = options.maxWidth, maxHeight = options.maxHeight, aspectRatio = options.aspectRatio;
+        allowedTypes = _b === void 0 ? [] : _b;
         if (!file) {
             return { isValid: false, message: 'File is required' };
         }
@@ -283,13 +281,10 @@ var validate = {
     isMoney: function (amount, options) {
         var _a;
         if (options === void 0) { options = {}; }
-        var _b = options.currency, currency = _b === void 0 ? 'USD' : _b, _c = options.minAmount, minAmount = _c === void 0 ? 0 : _c, _d = options.maxAmount, maxAmount = _d === void 0 ? Number.MAX_SAFE_INTEGER : _d, _e = options.allowNegative, allowNegative = _e === void 0 ? false : _e, _f = options.decimals, decimals = _f === void 0 ? 2 : _f;
+        var _b = options.minAmount, minAmount = _b === void 0 ? 0 : _b, _c = options.maxAmount, maxAmount = _c === void 0 ? Number.MAX_SAFE_INTEGER : _c, _d = options.decimals, decimals = _d === void 0 ? 2 : _d;
         var value = typeof amount === 'string' ? parseFloat(amount) : amount;
         if (isNaN(value)) {
             return { isValid: false, message: 'Invalid monetary value' };
-        }
-        if (!allowNegative && value < 0) {
-            return { isValid: false, message: 'Negative values are not allowed' };
         }
         if (value < minAmount) {
             return { isValid: false, message: "Amount must be at least ".concat(minAmount) };
@@ -672,31 +667,20 @@ var validate = {
         }
         return { isValid: true, message: 'Valid object' };
     },
-    isDateInRange: function (date, options) {
-        if (options === void 0) { options = {}; }
-        var minDate = options.minDate, maxDate = options.maxDate, _a = options.allowWeekends, allowWeekends = _a === void 0 ? true : _a, _b = options.allowHolidays, allowHolidays = _b === void 0 ? true : _b, format = options.format, timezone = options.timezone, _c = options.allowFuture, allowFuture = _c === void 0 ? true : _c, _d = options.allowPast, allowPast = _d === void 0 ? true : _d, minAge = options.minAge, maxAge = options.maxAge;
+    isDateInRange: function (date, _a) {
+        var _b = _a === void 0 ? {} : _a, minDate = _b.minDate, maxDate = _b.maxDate, _c = _b.allowFuture, allowFuture = _c === void 0 ? true : _c, _d = _b.allowPast, allowPast = _d === void 0 ? true : _d;
         // Convert string to Date if necessary
         var dateObj;
         if (typeof date === 'string') {
-            if (format) {
-                // Here you would implement date parsing based on the format
-                // For now, we'll use basic parsing
-                dateObj = new Date(date);
-            }
-            else {
-                dateObj = new Date(date);
-            }
+            // Here you would implement date parsing based on the format
+            // For now, we'll use basic parsing
+            dateObj = new Date(date);
         }
         else {
             dateObj = date;
         }
         if (isNaN(dateObj.getTime())) {
             return { isValid: false, message: 'Invalid date format' };
-        }
-        // Timezone adjustment if specified
-        if (timezone) {
-            // Here you would implement timezone conversion
-            // This would require a date library like moment-timezone
         }
         var now = new Date();
         // Future/past checks
@@ -719,33 +703,12 @@ var validate = {
                 return { isValid: false, message: "Date must be before ".concat(maxDateObj.toISOString()) };
             }
         }
-        // Weekend check
-        if (!allowWeekends) {
-            var day = dateObj.getDay();
-            if (day === 0 || day === 6) {
-                return { isValid: false, message: 'Weekends are not allowed' };
-            }
-        }
-        // Age checks
-        if (minAge !== undefined || maxAge !== undefined) {
-            var ageDate = new Date(dateObj);
-            var years = now.getFullYear() - ageDate.getFullYear();
-            var monthDiff = now.getMonth() - ageDate.getMonth();
-            var dayDiff = now.getDate() - ageDate.getDate();
-            var age = years - (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0) ? 1 : 0);
-            if (minAge !== undefined && age < minAge) {
-                return { isValid: false, message: "Age must be at least ".concat(minAge, " years") };
-            }
-            if (maxAge !== undefined && age > maxAge) {
-                return { isValid: false, message: "Age cannot be more than ".concat(maxAge, " years") };
-            }
-        }
         return { isValid: true, message: 'Valid date' };
     },
     isValidFileType: function (fileName, options) {
         var _a;
         if (options === void 0) { options = {}; }
-        var _b = options.allowedExtensions, allowedExtensions = _b === void 0 ? [] : _b, _c = options.allowedMimeTypes, allowedMimeTypes = _c === void 0 ? [] : _c, _d = options.maxFileNameLength, maxFileNameLength = _d === void 0 ? 255 : _d, _e = options.allowSpaces, allowSpaces = _e === void 0 ? true : _e, _f = options.checkMimeType, checkMimeType = _f === void 0 ? true : _f, _g = options.allowHidden, allowHidden = _g === void 0 ? false : _g;
+        var _b = options.allowedExtensions, allowedExtensions = _b === void 0 ? [] : _b, _c = options.maxFileNameLength, maxFileNameLength = _c === void 0 ? 255 : _c, _d = options.allowSpaces, allowSpaces = _d === void 0 ? true : _d, _e = options.allowHidden, allowHidden = _e === void 0 ? false : _e;
         if (!fileName) {
             return { isValid: false, message: 'Filename is required' };
         }
@@ -776,24 +739,31 @@ var validate = {
 // Helper functions
 function convertTo24Hour(time12h) {
     var _a = time12h.split(' '), time = _a[0], modifier = _a[1];
-    var _b = time.split(':'), hours = _b[0], minutes = _b[1], seconds = _b[2];
+    var _b = time.split(':'), hours = _b[0], minutes = _b[1];
+    var convertedHours = hours;
     if (hours === '12') {
-        hours = '00';
+        convertedHours = modifier === 'AM' ? '00' : '12';
     }
-    if (modifier.toLowerCase() === 'pm') {
-        hours = (parseInt(hours, 10) + 12).toString();
+    else if (modifier === 'PM') {
+        convertedHours = (parseInt(hours, 10) + 12).toString();
     }
-    return "".concat(hours, ":").concat(minutes).concat(seconds ? ":".concat(seconds) : '');
+    return {
+        hour: parseInt(convertedHours, 10),
+        minute: parseInt(minutes, 10),
+        isValid: true
+    };
 }
 function convertToDMS(decimal, type) {
     var absolute = Math.abs(decimal);
     var degrees = Math.floor(absolute);
     var minutesNotTruncated = (absolute - degrees) * 60;
     var minutes = Math.floor(minutesNotTruncated);
-    var seconds = ((minutesNotTruncated - minutes) * 60).toFixed(2);
     var direction = type === 'lat'
         ? decimal >= 0 ? 'N' : 'S'
         : decimal >= 0 ? 'E' : 'W';
-    return "".concat(degrees, "\u00B0").concat(minutes, "'").concat(seconds, "\"").concat(direction);
+    return {
+        dms: "".concat(degrees, "\u00B0").concat(minutes, "'").concat(direction),
+        isValid: true
+    };
 }
 exports.default = validate;
